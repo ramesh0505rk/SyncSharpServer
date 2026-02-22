@@ -1,0 +1,6 @@
+@SyncSharpServer_HostAddress = http://localhost:5269
+
+GET {{SyncSharpServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using SyncSharpServer.Common.ExceptionHandling;
+using SyncSharpServer.Common.Response;
+using System.Net;
 
 namespace SyncSharpServer.Middlewares
 {
@@ -23,10 +25,11 @@ namespace SyncSharpServer.Middlewares
 			try
 			{
 				await _next(context);
+				await HandlePipelineErrorsAsync(context);
 			}
 			catch (Exception ex)
 			{
-				await
+				await LogAndWriteErrorAsync(context, ex);
 			}
 		}
 
@@ -64,7 +67,7 @@ namespace SyncSharpServer.Middlewares
 			if (statusMap.TryGetValue(context.Response.StatusCode, out var statusCode))
 			{
 				_logger.LogError("----- {StatusCode} {StatusDescription} Response Returned by Pipeline -----\nPath: {Path}", (int)statusCode, statusCode, context.Request.Path);
-				
+
 
 			}
 		}
@@ -73,7 +76,29 @@ namespace SyncSharpServer.Middlewares
 		{
 			var (statusCode, customErrors) = ex switch
 			{
-				
+				BadRequestException badRequestEx => (HttpStatusCode.BadRequest, badRequestEx.Errors),
+				UnauthorizedException unauthorizeEx => (HttpStatusCode.Unauthorized, unauthorizeEx.Errors),
+				BadHttpRequestException => (HttpStatusCode.BadRequest, null),
+				UnauthorizedAccessException => (HttpStatusCode.Unauthorized, null),
+				_ => (HttpStatusCode.BadRequest, null)
+			};
+		}
+
+		private async Task WriteErrorResponseAsync(HttpContext context, HttpStatusCode statusCode, List<string>? customMessages = null)
+		{
+			if (context.Response.HasStarted)
+			{
+				_logger.LogWarning("Cannot write error response because the response has already started.");
+				return;
+			}
+
+			context.Response.ContentType = "application/json";
+			context.Response.StatusCode = (int)statusCode;
+
+			var errorDetails = customMessages?.Count > 0 ? string.Join("; ", customMessages) : string.Empty;
+			var errorResponse = new ApiErrorResponse
+			{
+				Errors = 
 			}
 		}
 	}

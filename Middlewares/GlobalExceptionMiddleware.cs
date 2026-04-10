@@ -1,6 +1,9 @@
-﻿using SyncSharpServer.Common.ExceptionHandling;
+﻿using Newtonsoft.Json;
+using SyncSharpServer.Common.ExceptionHandling;
 using SyncSharpServer.Common.Response;
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SyncSharpServer.Middlewares
 {
@@ -68,7 +71,7 @@ namespace SyncSharpServer.Middlewares
 			{
 				_logger.LogError("----- {StatusCode} {StatusDescription} Response Returned by Pipeline -----\nPath: {Path}", (int)statusCode, statusCode, context.Request.Path);
 
-
+				await WriteErrorResponseAsync(context, statusCode);
 			}
 		}
 
@@ -82,6 +85,9 @@ namespace SyncSharpServer.Middlewares
 				UnauthorizedAccessException => (HttpStatusCode.Unauthorized, null),
 				_ => (HttpStatusCode.BadRequest, null)
 			};
+
+			await LogRequestAsync(context, ex);
+			await WriteErrorResponseAsync(context, statusCode, customErrors);
 		}
 
 		private async Task WriteErrorResponseAsync(HttpContext context, HttpStatusCode statusCode, List<string>? customMessages = null)
@@ -98,8 +104,96 @@ namespace SyncSharpServer.Middlewares
 			var errorDetails = customMessages?.Count > 0 ? string.Join("; ", customMessages) : string.Empty;
 			var errorResponse = new ApiErrorResponse
 			{
-				Errors = 
+				Errors = ApiErrorHandler.GetDefaultErrorMessage(statusCode, errorDetails)
+			};
+
+			var options = new JsonSerializerOptions
+			{
+				PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+			};
+
+			var result = System.Text.Json.JsonSerializer.Serialize(errorResponse, options);
+			await context.Response.WriteAsync(result);
+		}
+
+		private async Task LogRequestAsync(HttpContext context, Exception ex = null)
+		{
+			var routeParams = context.Request.RouteValues.Select(r => $"{r.Key}={r.Value}").ToList();
+
+			var queryParams = context.Request.Query.Select(q => $"{q.Key}={q.Value}").ToList();
+
+			var requestBodyType = string.Empty;
+			var requestBodyContent = string.Empty;
+
+			try
+			{
+				if (context.Request.HasFormContentType)
+				{
+					requestBodyType = "Form Data";
+					var formDictionary = context.Request.Form.ToDictionary(f => f.Key, f => f.Value.ToString());
+
+					requestBodyContent = formDictionary.Count > 0 ? JsonConvert.SerializeObject(formDictionary, Formatting.Indented) : "[Empty Body]";
+				}
+				else if (context.Request.ContentType != null && context.Request.ContentType.Contains("application/json", StringComparison.OrdinalIgnoreCase))
+				{
+					requestBodyType = "JSON Body";
+					var jsonBody = await ReadRequestBodyAsync(context);
+					if (string.IsNullOrWhiteSpace(jsonBody))
+					{
+						requestBodyContent = "[Empty Body]";
+					}
+					else
+					{
+						requestBodyContent = jsonBody;
+					}
+				}
+				else
+				{
+					requestBodyType = "Unsupported or Empty Body";
+					requestBodyContent = $"[No supported body content. Content-Type: {context.Request.ContentType ?? "None"}]";
+				}
 			}
+			catch (Exception formEx)
+			{
+				requestBodyType = "Error Reading Body/Form";
+				requestBodyContent = "[Error reading form or body]";
+				_logger.LogWarning(formEx, "Error occurred while reading the request body/form.");
+			}
+
+			var logMessage = "----- Incoming Request -----\n" +
+							 "Method: {Method}\n" +
+							 "Path: {Path}\n" +
+							 "Route: {Route}\n" +
+							 "Query: {Query}\n" +
+							 "{RequestBodyType}: {RequestBodyContent}\n" +
+							 "---------------------------";
+
+			if (ex != null)
+			{
+				// Log as Error with Exception
+				_logger.LogError(ex, logMessage, context.Request.Method, context.Request.Path, string.Join(", ", routeParams), string.Join(", ", queryParams), requestBodyType, requestBodyContent);
+			}
+			else
+			{
+				_logger.LogError(logMessage, context.Request.Method, context.Request.Path, string.Join(", ", routeParams), string.Join(", ", queryParams), requestBodyType, requestBodyContent);
+			}
+		}
+
+		private static async Task<string> ReadRequestBodyAsync(HttpContext context)
+		{
+			context.Request.Body.Position = 0;
+
+			using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
+			var body = await reader.ReadToEndAsync();
+
+			context.Request.Body.Position = 0;
+
+			if (body.Length > 5000)
+			{
+				body = body.Substring(0, 5000) + "... [Truncated]";
+			}
+
+			return string.IsNullOrWhiteSpace(body) ? "[Empty Body]" : body;
 		}
 	}
 }

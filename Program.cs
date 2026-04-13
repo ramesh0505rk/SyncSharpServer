@@ -1,5 +1,6 @@
 using Serilog;
 using SyncSharpServer.Extensions;
+using SyncSharpServer.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +14,13 @@ builder.Services.AddSwaggerGen();
 
 //Register Extensions
 builder.Services.AddAuthentication(builder.Configuration);
+builder.Services.AddCorsExtension(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseCors("AllowedOrigins");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

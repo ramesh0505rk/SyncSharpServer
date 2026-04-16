@@ -1,14 +1,26 @@
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using SyncSharpServer.Extensions;
+using SyncSharpServer.Filters;
 using SyncSharpServer.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 Log.Logger = new LoggerConfiguration()
-	.ReadFrom.Configuration(builder.Configuration).CreateLogger();
+    .ReadFrom.Configuration(builder.Configuration).CreateLogger();
 
-builder.Services.AddControllers();
+builder.Host.UseSerilog();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ApiResponseWrapperFilter>();
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 builder.Services.AddSwaggerGen();
 
@@ -25,8 +37,8 @@ app.UseCors("AllowedOrigins");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

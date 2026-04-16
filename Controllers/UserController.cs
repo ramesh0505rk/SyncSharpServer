@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SyncSharpServer.Interfaces;
 using SyncSharpServer.Models.RequestModels;
 
 namespace SyncSharpServer.Controllers
@@ -8,18 +9,16 @@ namespace SyncSharpServer.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly IUserService _service;
+        public UserController(IUserService service)
+        {
+            _service = service;
+        }
+
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn([FromBody] SignInRequestModel request)
         {
-            try
-            {
-
-                return BadRequest(new { Errors = "Invalid Params" });
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Invalid Params {ex}", ex);
-            }
+            return Ok(await _service.SignIn(request));
         }
 
         [HttpPost("SignUp")]

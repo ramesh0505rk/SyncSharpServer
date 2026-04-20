@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SyncSharpServer.Interfaces;
 using SyncSharpServer.Models.RequestModels;
 
@@ -9,22 +8,22 @@ namespace SyncSharpServer.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _service;
+        private IUserService _service;
         public UserController(IUserService service)
         {
             _service = service;
         }
 
         [HttpPost("SignIn")]
-        public async Task<IActionResult> SignIn([FromBody] SignInRequestModel request)
+        public async Task<IActionResult> SignIn([FromBody] SignInRequestModel request, CancellationToken cancellationToken)
         {
-            return Ok(await _service.SignIn(request));
+            return Ok(await _service.SignIn(request, cancellationToken));
         }
 
         [HttpPost("SignUp")]
-        public async Task<IActionResult> SignUp([FromBody] SignUpRequestModel request)
+        public async Task<IActionResult> SignUp([FromBody] SignUpRequestModel request, CancellationToken cancellationToken)
         {
-            return Ok();
+            return Ok(await _service.SignUp(request, cancellationToken);
         }
     }
 }

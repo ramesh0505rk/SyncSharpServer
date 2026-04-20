@@ -25,8 +25,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddSwaggerGen();
 
 //Register Extensions
-builder.Services.AddAuthentication(builder.Configuration);
-builder.Services.AddCorsExtension(builder.Configuration);
+builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
 

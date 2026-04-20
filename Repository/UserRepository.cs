@@ -83,5 +83,30 @@ namespace SyncSharpServer.Repository
 				throw;
 			}
 		}
+
+		public async Task<Guid?> ValidateUser(string email, string password, CancellationToken cancellationToken)
+		{
+			try
+			{
+				_logger.LogInformation("Information in UserRepository.ValidateUser. Input parameters: Email = {email}", email);
+				using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+
+				var query = @"SELECT UserID FROM SyncSharp.dbo.[user] WHERE 
+							Email = @Email AND [Password] = @Password";
+
+				var parameters = new DynamicParameters();
+				parameters.Add("@Email", email);
+				parameters.Add("@Password", password);
+
+				var result = await connection.QueryFirstOrDefaultAsync<Guid?>(query, parameters);
+				return result;
+			}
+			catch (Exception ex)
+			{
+				var inputParams = new { email };
+				_logger.LogError(ex, "Error thrown in UserRepository.ValidateUser. Input parameters: {InputParams}", JsonConvert.SerializeObject(inputParams));
+				throw;
+			}
+		}
 	}
 }

@@ -72,6 +72,18 @@ namespace SyncSharpServer.Services
 			}
 		}
 
+		private async Task<Guid> ValidateUser(SignInRequestModel request, CancellationToken cancellationToken)
+		{
+			try
+			{
+				var userId = await _userRepository.
+			}
+			catch(Exception ex)
+			{
+				_logger.LogError(ex, "Error thrown in UserService.ValidateUser. Input parameters: {InputParams}", )
+			}
+		}
+
 		private string GenerateToken(User user)
 		{
 			var jwtSettings = _configuration.GetSection("Jwt");

@@ -1,4 +1,5 @@
-﻿using SyncSharpServer.Models.RequestModels;
+﻿using SyncSharpServer.Entities;
+using SyncSharpServer.Models.RequestModels;
 using SyncSharpServer.Models.ResponseModels;
 
 namespace SyncSharpServer.Interfaces
@@ -7,6 +8,6 @@ namespace SyncSharpServer.Interfaces
     {
         Task<SignInResponseModel> SignInAsync(SignInRequestModel request);
         Task<bool> CheckUserExists(string userEmail, CancellationToken cancellationToken);
-
-    }
+        Task<User> CreateUser(SignUpRequestModel request, CancellationToken cancellationToken);
+	}
 }

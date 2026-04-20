@@ -23,7 +23,7 @@ namespace SyncSharpServer.Controllers
         [HttpPost("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequestModel request, CancellationToken cancellationToken)
         {
-            return Ok(await _service.SignUp(request, cancellationToken);
+            return Ok(await _service.SignUp(request, cancellationToken));
         }
     }
 }

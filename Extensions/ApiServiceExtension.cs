@@ -29,6 +29,7 @@ namespace SyncSharpServer.Extensions
 
             //Register service interfaces
             services.AddScoped<IUserService, UserService>();
+            services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
             //Register DB connection factory
             services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();

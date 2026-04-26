@@ -6,7 +6,7 @@ namespace SyncSharpServer.Interfaces
 {
 	public interface IUserService
 	{
-		Task<SignInResponseModel> SignIn(SignInRequestModel request, CancellationToken cancellationToken);
+		Task<SignInDTO> SignIn(SignInRequestModel request, CancellationToken cancellationToken);
 		Task<SignUpDTO> SignUp(SignUpRequestModel request, CancellationToken cancellationToken);
 	}
 }

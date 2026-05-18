@@ -38,5 +38,23 @@ namespace SyncSharpServer.Controllers
         {
             return Ok(await _workService.UpdateWork(request, cancellationToken));
         }
+
+        [HttpDelete("DeleteWork/{WorkID}")]
+        public async Task<IActionResult> DeleteWork(Guid WorkID, CancellationToken cancellationToken)
+        {
+            return Ok(await _workService.DeleteWork(WorkID, cancellationToken));
+        }
+
+        [HttpPost("AddWorkMember")]
+        public async Task<IActionResult> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
+        {
+            return Ok(await _workService.AddWorkMember(request, cancellationToken));
+        }
+
+        [HttpDelete("DeleteWorkMember")]
+        public async Task<IActionResult> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
+        {
+            return Ok(await _workService.DeleteWorkMember(request, cancellationToken));
+        }
     }
 }

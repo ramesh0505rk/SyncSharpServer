@@ -121,5 +121,72 @@ namespace SyncSharpServer.Repository
                 throw;
             }
         }
+
+        public async Task<bool> DeleteWork(Guid WorkID, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+                var query = "DELETE FROM Work WHERE WorkID = @WorkID";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@WorkID", WorkID);
+
+                var result = await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.Text);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkRepository.DeleteWork. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { WorkID }));
+                throw;
+            }
+        }
+
+        public async Task<bool> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+                var query = @"
+                            IF NOT EXISTS (SELECT 1 FROM WorkMembers WHERE WorkID = @WorkID AND UserID = @UserID)
+                            BEGIN
+                                INSERT INTO WorkMembers (WorkID, UserID) VALUES (@WorkID, @UserID)
+                            END
+                            ";
+                var parameters = new DynamicParameters();
+                parameters.Add("@WorkID", request.WorkID);
+                parameters.Add("@UserID", request.UserID);
+
+                var result = await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.Text);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkRepository.AddWorkMember. Input parameters: {InputParams}", JsonConvert.SerializeObject(request));
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+                var query = "DELETE FROM WorkMembers WHERE WorkID = @WorkID AND UserID = @UserID";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@WorkID", request.WorkID);
+                parameters.Add("@UserID", request.UserID);
+
+                var result = await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.Text);
+                return result > 0;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkRepository.DeleteWorkMember. Input parameters: {InputParams}", JsonConvert.SerializeObject(request));
+                throw;
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using SyncSharpServer.ResponseDTOs;
+using Newtonsoft.Json;
 
 namespace SyncSharpServer.Services
 {
@@ -39,6 +40,20 @@ namespace SyncSharpServer.Services
             var accessToken = GenerateToken(user);
 
             return CreateSignUpSuccessResponse(accessToken);
+        }
+
+        public async Task<bool> UserNameExists(string UserName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var userNameExists = await _userRepository.UserNameExists(UserName, cancellationToken);
+                return userNameExists;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in UserService.UserNameExists. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { UserName }));
+                throw;
+            }
         }
 
         private async Task CheckUserExists(SignUpRequestModel request, CancellationToken cancellationToken)
@@ -77,11 +92,11 @@ namespace SyncSharpServer.Services
         {
             try
             {
-                var userId = await _userRepository.ValidateUser(request.Email, request.Password, cancellationToken);
+                var userId = await _userRepository.ValidateUser(request.UserName, request.Password, cancellationToken);
                 if (userId == null)
                 {
-                    _logger.LogError("Invalid credentials provided for user: {Email}", request.Email);
-                    throw new BadRequestException(["Invalid email or password."]);
+                    _logger.LogError("Invalid credentials provided for user: {UserName}", request.UserName);
+                    throw new BadRequestException(["Invalid username or password."]);
                 }
                 return userId;
             }
@@ -115,6 +130,7 @@ namespace SyncSharpServer.Services
             var claims = new[]
             {
                 new Claim("UserID", user.UserID.ToString()),
+                new Claim("UserName", user.UserName),
                 new Claim("FirstName",user.FirstName),
                 new Claim("LastName", user.LastName),
                 new Claim("Email",user.Email)

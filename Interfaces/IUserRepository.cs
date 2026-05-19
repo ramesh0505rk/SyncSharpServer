@@ -11,6 +11,6 @@ namespace SyncSharpServer.Interfaces
         Task<User> CreateUser(SignUpRequestModel request, CancellationToken cancellationToken);
         Task<Guid?> ValidateUser(string email, string password, CancellationToken cancellationToken);
         Task<User> GetUserDetailsByUserId(Guid? userId, CancellationToken cancellationToken);
-
+        Task<bool> UserNameExists(string UserName, CancellationToken cancellationToken);
     }
 }

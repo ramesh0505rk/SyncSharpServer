@@ -8,5 +8,6 @@ namespace SyncSharpServer.Interfaces
 	{
 		Task<SignInDTO> SignIn(SignInRequestModel request, CancellationToken cancellationToken);
 		Task<SignUpDTO> SignUp(SignUpRequestModel request, CancellationToken cancellationToken);
+		Task<bool> UserNameExists(string UserName, CancellationToken cancellationToken);
 	}
 }

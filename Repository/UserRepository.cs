@@ -69,10 +69,11 @@ namespace SyncSharpServer.Repository
 
                 var hashedPassword = _passwordHasher.HashPassword(request.Password);
 
-                var query = "INSERT INTO SyncSharp.dbo.[user] (UserID, FirstName, LastName, Email, Password) OUTPUT INSERTED.* VALUES (@UserID, @FirstName, @LastName, @Email, @Password);";
+                var query = "INSERT INTO SyncSharp.dbo.[user] (UserID, UserName, FirstName, LastName, Email, Password) OUTPUT INSERTED.* VALUES (@UserID, @UserName, @FirstName, @LastName, @Email, @Password);";
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@UserID", Guid.NewGuid());
+                parameters.Add("@UserName", request.UserName);
                 parameters.Add("@FirstName", request.FirstName);
                 parameters.Add("@LastName", request.LastName);
                 parameters.Add("@Email", request.Email);
@@ -88,35 +89,35 @@ namespace SyncSharpServer.Repository
             }
         }
 
-		public async Task<Guid?> ValidateUser(string email, string password, CancellationToken cancellationToken)
-		{
-			try
-			{
-				_logger.LogInformation("Information in UserRepository.ValidateUser. Input parameters: Email = {email}", email);
-				using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+        public async Task<Guid?> ValidateUser(string userName, string password, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.LogInformation("Information in UserRepository.ValidateUser. Input parameters: UserName = {UserName}", userName);
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
 
-				var query = @"SELECT UserID, [Password] FROM SyncSharp.dbo.[user] WHERE Email = @Email";
+                var query = @"SELECT UserID, [Password] FROM SyncSharp.dbo.[user] WHERE UserName COLLATE Latin1_General_CS_AS = @UserName";
 
-				var parameters = new DynamicParameters();
-				parameters.Add("@Email", email);
+                var parameters = new DynamicParameters();
+                parameters.Add("@UserName", userName);
 
-				var user = await connection.QueryFirstOrDefaultAsync<(Guid? UserId, string Password)>(query, parameters);
+                var user = await connection.QueryFirstOrDefaultAsync<(Guid? UserId, string Password)>(query, parameters);
 
-				if (user.UserId == null || string.IsNullOrEmpty(user.Password))
-				{
-					return null;
-				}
+                if (user.UserId == null || string.IsNullOrEmpty(user.Password))
+                {
+                    return null;
+                }
 
-				var isPasswordValid = _passwordHasher.VerifyPassword(password, user.Password);
-				return isPasswordValid ? user.UserId : null;
-			}
-			catch (Exception ex)
-			{
-				var inputParams = new { email };
-				_logger.LogError(ex, "Error thrown in UserRepository.ValidateUser. Input parameters: {InputParams}", JsonConvert.SerializeObject(inputParams));
-				throw;
-			}
-		}
+                var isPasswordValid = _passwordHasher.VerifyPassword(password, user.Password);
+                return isPasswordValid ? user.UserId : null;
+            }
+            catch (Exception ex)
+            {
+                var inputParams = new { userName };
+                _logger.LogError(ex, "Error thrown in UserRepository.ValidateUser. Input parameters: {InputParams}", JsonConvert.SerializeObject(inputParams));
+                throw;
+            }
+        }
 
         public async Task<User> GetUserDetailsByUserId(Guid? userId, CancellationToken cancellationToken)
         {
@@ -125,7 +126,7 @@ namespace SyncSharpServer.Repository
                 _logger.LogInformation("Information in UserRepository.GetUserDetailsByUserId. Input params: UserId = {userId}", userId);
                 using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
 
-                var query = @"SELECT UserID, FirstName, LastName, Email 
+                var query = @"SELECT UserID, UserName, FirstName, LastName, Email 
                             FROM [User] WHERE UserID = @UserID";
 
                 var parameters = new DynamicParameters();
@@ -139,6 +140,26 @@ namespace SyncSharpServer.Repository
             {
                 var inputParams = new { userId };
                 _logger.LogError(ex, "Error thrown in UserRepository.GetUserDetailsByUserId. Input parameters: {InputParams}", JsonConvert.SerializeObject(inputParams));
+                throw;
+            }
+        }
+
+        public async Task<bool> UserNameExists(string UserName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+                var query = @"SELECT COUNT(1) FROM [User] WHERE UserName = @UserName";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@UserName", UserName);
+
+                var result = await connection.ExecuteScalarAsync<int>(query, parameters, commandType: System.Data.CommandType.Text);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in UserRepository.GetUserDetailsByUserId. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { UserName }));
                 throw;
             }
         }

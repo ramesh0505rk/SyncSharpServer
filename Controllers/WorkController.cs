@@ -62,5 +62,11 @@ namespace SyncSharpServer.Controllers
 		{
 			return Ok(await _workService.GetMembers(WorkID, cancellationToken));
 		}
+
+		[HttpGet("{WorkID}/active-sessions")]
+		public async Task<IActionResult> GetActiveSessions(Guid WorkID, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.GetActiveSessions(WorkID, cancellationToken));
+		}
 	}
 }

@@ -208,7 +208,33 @@ namespace SyncSharpServer.Services
             }
         }
 
-        GeneralResponse<T> CreateSuccessResponse<T>(T data)
+        public async Task<ActiveSession?> GetSessionByConnectionID(string connectionID, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _workRepository.GetSessionByConnectionID(connectionID, cancellationToken);
+			}
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkService.GetSessionByConnectionID. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { connectionID }));
+                throw;
+			}
+		}
+
+        public async Task<List<ActiveSession>> GetActiveSessions(Guid WorkID, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _workRepository.GetActiveSessions(WorkID,cancellationToken);
+			}
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkService.GetActiveSessions. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { WorkID }));
+                throw;
+			}
+        }
+
+		GeneralResponse<T> CreateSuccessResponse<T>(T data)
         {
             return new GeneralResponse<T>
             {

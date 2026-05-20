@@ -1,4 +1,5 @@
 ﻿using SyncSharpServer.Entities;
+using SyncSharpServer.Models;
 using SyncSharpServer.Models.RequestModels;
 using SyncSharpServer.Models.ResponseModels;
 
@@ -12,5 +13,7 @@ namespace SyncSharpServer.Interfaces
         Task<Guid?> ValidateUser(string email, string password, CancellationToken cancellationToken);
         Task<User> GetUserDetailsByUserId(Guid? userId, CancellationToken cancellationToken);
         Task<bool> UserNameExists(string UserName, CancellationToken cancellationToken);
-    }
+        
+
+	}
 }

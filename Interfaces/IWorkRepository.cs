@@ -1,4 +1,5 @@
-﻿using SyncSharpServer.Models;
+﻿using SyncSharpServer.Entities;
+using SyncSharpServer.Models;
 using SyncSharpServer.Models.RequestModels;
 using SyncSharpServer.ResponseDTOs;
 
@@ -13,5 +14,7 @@ namespace SyncSharpServer.Interfaces
         Task<bool> DeleteWork(Guid WorkID, CancellationToken cancellationToken);
         Task<bool> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
         Task<bool> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
-    }
+		Task<bool> HasAccess(Guid WorkID, Guid UserID, CancellationToken cancellationToken);
+		Task<List<User>> GetMembers(Guid WorkID, CancellationToken cancellationToken);
+	}
 }

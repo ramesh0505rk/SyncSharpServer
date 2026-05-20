@@ -5,56 +5,62 @@ using SyncSharpServer.Models.RequestModels;
 
 namespace SyncSharpServer.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class WorkController : ControllerBase
-    {
-        private readonly IWorkService _workService;
-        public WorkController(IWorkService workService)
-        {
-            _workService = workService;
-        }
+	[Route("api/[controller]")]
+	[ApiController]
+	public class WorkController : ControllerBase
+	{
+		private readonly IWorkService _workService;
+		public WorkController(IWorkService workService)
+		{
+			_workService = workService;
+		}
 
-        [HttpGet("GetWorkByID/{WorkID}")]
-        public async Task<IActionResult> GetWorkByID(Guid WorkID, CancellationToken cancellationToken)
-        {
-            return Ok(await _workService.GetWorkByID(WorkID, cancellationToken));
-        }
+		[HttpGet("GetWorkByID/{WorkID}")]
+		public async Task<IActionResult> GetWorkByID(Guid WorkID, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.GetWorkByID(WorkID, cancellationToken));
+		}
 
-        [HttpGet("GetUserWorks/{UserID}")]
-        public async Task<IActionResult> GetUserWorks(Guid UserID, CancellationToken cancellationToken)
-        {
-            return Ok(await _workService.GetUserWorks(UserID, cancellationToken));
-        }
+		[HttpGet("GetUserWorks/{UserID}")]
+		public async Task<IActionResult> GetUserWorks(Guid UserID, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.GetUserWorks(UserID, cancellationToken));
+		}
 
-        [HttpPost("CreateWork")]
-        public async Task<IActionResult> CreateWork(CreateWorkRequestModel request, CancellationToken cancellationToken)
-        {
-            return Ok(await _workService.CreateWork(request, cancellationToken));
-        }
+		[HttpPost("CreateWork")]
+		public async Task<IActionResult> CreateWork(CreateWorkRequestModel request, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.CreateWork(request, cancellationToken));
+		}
 
-        [HttpPut("UpdateWork")]
-        public async Task<IActionResult> UpdateWork(UpdateWorkRequestModel request, CancellationToken cancellationToken)
-        {
-            return Ok(await _workService.UpdateWork(request, cancellationToken));
-        }
+		[HttpPut("UpdateWork")]
+		public async Task<IActionResult> UpdateWork(UpdateWorkRequestModel request, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.UpdateWork(request, cancellationToken));
+		}
 
-        [HttpDelete("DeleteWork/{WorkID}")]
-        public async Task<IActionResult> DeleteWork(Guid WorkID, CancellationToken cancellationToken)
-        {
-            return Ok(await _workService.DeleteWork(WorkID, cancellationToken));
-        }
+		[HttpDelete("DeleteWork/{WorkID}")]
+		public async Task<IActionResult> DeleteWork(Guid WorkID, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.DeleteWork(WorkID, cancellationToken));
+		}
 
-        [HttpPost("AddWorkMember")]
-        public async Task<IActionResult> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
-        {
-            return Ok(await _workService.AddWorkMember(request, cancellationToken));
-        }
+		[HttpPost("AddWorkMember")]
+		public async Task<IActionResult> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.AddWorkMember(request, cancellationToken));
+		}
 
-        [HttpDelete("DeleteWorkMember")]
-        public async Task<IActionResult> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
-        {
-            return Ok(await _workService.DeleteWorkMember(request, cancellationToken));
-        }
-    }
+		[HttpDelete("DeleteWorkMember")]
+		public async Task<IActionResult> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.DeleteWorkMember(request, cancellationToken));
+		}
+
+		[HttpGet("{WorkID}/Members")]
+		public async Task<IActionResult> GetMembers(Guid WorkID, CancellationToken cancellationToken)
+		{
+			return Ok(await _workService.GetMembers(WorkID, cancellationToken));
+		}
+	}
 }

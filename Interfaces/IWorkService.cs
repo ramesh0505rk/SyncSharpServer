@@ -15,7 +15,8 @@ namespace SyncSharpServer.Interfaces
         Task<GeneralResponse<bool>> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
         Task<GeneralResponse<bool>> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
         Task<bool> HasAccess(Guid WorkID, Guid UserID, CancellationToken cancellationToken);
-		Task<GeneralResponse<List<User>>> GetMembers(Guid WorkID, CancellationToken cancellationToken);
-
-	}
+        Task<GeneralResponse<List<User>>> GetMembers(Guid WorkID, CancellationToken cancellationToken);
+        Task<bool> SaveActiveSession(Guid WorkID, Guid UserID, string ConnectionID, string UserName, CancellationToken cancellationToken);
+        Task<bool> RemoveActiveSessionAsync(string connectionID, CancellationToken cancellationToken);
+    }
 }

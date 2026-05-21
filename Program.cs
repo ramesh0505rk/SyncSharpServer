@@ -2,30 +2,34 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using SyncSharpServer.Extensions;
 using SyncSharpServer.Filters;
+using SyncSharpServer.Hubs;
 using SyncSharpServer.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration).CreateLogger();
+	.ReadFrom.Configuration(builder.Configuration).CreateLogger();
 
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<ApiResponseWrapperFilter>();
+	options.Filters.Add<ApiResponseWrapperFilter>();
 });
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-    options.SuppressModelStateInvalidFilter = true;
+	options.SuppressModelStateInvalidFilter = true;
 });
 
 builder.Services.AddSwaggerGen();
 
 //Register Extensions
 builder.Services.AddApiServices(builder.Configuration);
+
+//Add SignalR
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -36,8 +40,8 @@ app.UseCors("AllowedOrigins");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
@@ -45,5 +49,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<WorkHub>("/workhub");
 
 app.Run();

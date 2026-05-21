@@ -331,6 +331,26 @@ namespace SyncSharpServer.Repository
             }
         }
 
+        public async Task<bool> UpdateSessionActivityAsync(string connectionID, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+                var query = "UPDATE ActiveSessions SET LastActivity = GETDATE() WHERE ConnectionID = @ConnectionID";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@ConnectionID", connectionID);
+
+                var result = await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.Text);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkRepository.UpdateSessionActivityAsync. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { connectionID }));
+                throw;
+            }
+        }
+
         public async Task<WorkDetailDTO> GetWorkDetail(Guid WorkID, CancellationToken cancellationToken)
         {
             try

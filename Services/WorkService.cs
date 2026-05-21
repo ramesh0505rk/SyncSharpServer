@@ -234,6 +234,19 @@ namespace SyncSharpServer.Services
             }
         }
 
+        public async Task<bool> UpdateSessionActivityAsync(string connectionID, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _workRepository.UpdateSessionActivityAsync(connectionID, cancellationToken);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkService.UpdateSessionActivityAsync. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { connectionID }));
+                throw;
+            }
+        }
+
         public async Task<GeneralResponse<WorkDetailDTO>> GetWorkDetail(Guid WorkID, CancellationToken cancellationToken)
         {
             try

@@ -16,6 +16,7 @@ namespace SyncSharpServer.Hubs
             _logger = logger;
         }
 
+        // ======================== JOIN WORK ========================
         public async Task JoinWork(Guid WorkID, Guid UserID, string username)
         {
             try
@@ -80,6 +81,33 @@ namespace SyncSharpServer.Hubs
                 var inputParams = new { WorkID, UserID, username };
                 _logger.LogError(ex, "Error thrown in WorkHub.JoinWork. Input parameters: {InputParams}", JsonConvert.SerializeObject(inputParams));
                 await Clients.Caller.SendAsync("Error", "Failed to join work. Please try again later.");
+            }
+        }
+
+        // ======================== UPDATE CODE - REALTIME ========================
+        public async Task UpdateCode(Guid workID, string code, int cursorPosition)
+        {
+            try
+            {
+                string groupName = $"Work-{workID}";
+
+                // Update session activity
+                await _workService.UpdateSessionActivityAsync(Context.ConnectionId, Context.ConnectionAborted);
+
+                // Broadcast every one in the group except the sender
+                await Clients.OthersInGroup(groupName).SendAsync("CodeUpdated", new
+                {
+                    code,
+                    cursorPosition,
+                    updatedBy = Context.ConnectionId,
+                    timestamp = DateTime.UtcNow
+                });
+
+                _logger.LogInformation($"Code updated in work {workID} by connection {Context.ConnectionId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in UpdateCode for WorkID: {workID}");
             }
         }
     }

@@ -213,28 +213,47 @@ namespace SyncSharpServer.Services
             try
             {
                 return await _workRepository.GetSessionByConnectionID(connectionID, cancellationToken);
-			}
-            catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error thrown in WorkService.GetSessionByConnectionID. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { connectionID }));
                 throw;
-			}
-		}
+            }
+        }
 
         public async Task<List<ActiveSession>> GetActiveSessions(Guid WorkID, CancellationToken cancellationToken)
         {
             try
             {
-                return await _workRepository.GetActiveSessions(WorkID,cancellationToken);
-			}
-            catch(Exception ex)
+                return await _workRepository.GetActiveSessions(WorkID, cancellationToken);
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error thrown in WorkService.GetActiveSessions. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { WorkID }));
                 throw;
-			}
+            }
         }
 
-		GeneralResponse<T> CreateSuccessResponse<T>(T data)
+        public async Task<GeneralResponse<WorkDetailDTO>> GetWorkDetail(Guid WorkID, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _workRepository.GetWorkDetail(WorkID, cancellationToken);
+                if(result == null)
+                {
+                    _logger.LogError("Work detail not found for the specified WorkID. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { WorkID }));
+                    throw new BadRequestException(["Work detail not found for the specified WorkID"]);
+                }
+                return CreateSuccessResponse<WorkDetailDTO>(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkService.GetWorkDetail. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { WorkID }));
+                throw;
+            }
+        }
+
+        GeneralResponse<T> CreateSuccessResponse<T>(T data)
         {
             return new GeneralResponse<T>
             {

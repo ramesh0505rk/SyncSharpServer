@@ -21,5 +21,7 @@ namespace SyncSharpServer.Interfaces
         Task<bool> RemoveActiveSessionAsync(string connectionID, CancellationToken cancellationToken);
         Task<ActiveSession?> GetSessionByConnectionID(string connectionID, CancellationToken cancellationToken);
         Task<List<ActiveSession>> GetActiveSessions(Guid WorkID, CancellationToken cancellationToken);
-	}
+        Task<GeneralResponse<WorkDetailDTO>> GetWorkDetail(Guid WorkID, CancellationToken cancellationToken);
+
+    }
 }

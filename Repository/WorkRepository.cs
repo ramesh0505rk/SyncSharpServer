@@ -46,11 +46,15 @@ namespace SyncSharpServer.Repository
             {
                 using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
                 var query = @"
-                            SELECT DISTINCT w.* 
-                            FROM Work w
-                            LEFT JOIN WorkMembers wm ON w.WorkID = wm.WorkID
-                            WHERE w.CreatedBy = @UserID or wm.UserID = @UserID
-                            ORDER BY w.LastModified DESC
+                            SELECT DISTINCT w.*,
+                                (
+                                    SELECT COUNT(as1.UserID) 
+                                    FROM ActiveSessions as1 WHERE WorkID = w.WorkID
+                                )
+                                FROM Work w
+                                LEFT JOIN WorkMembers wm ON w.WorkID = wm.WorkID
+                                WHERE w.CreatedBy = @UserID or wm.UserID = @UserID
+                                ORDER BY w.LastModified DESC
                             ";
                 var parameters = new DynamicParameters();
                 parameters.Add("@UserID", UserID);

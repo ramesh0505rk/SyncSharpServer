@@ -176,7 +176,7 @@ namespace SyncSharpServer.Hubs
 			}
 		}
 
-		// ======================== LEAVE WORK ========================
+		// ======================== DISCONNECTED ========================
 		public override async Task OnDisconnectedAsync(Exception? exception)
 		{
 			try

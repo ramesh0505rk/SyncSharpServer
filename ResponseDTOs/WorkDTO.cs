@@ -10,5 +10,6 @@
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastModified { get; set; }
+        public int? ActiveUsersCount { get; set; } = 0;
     }
 }

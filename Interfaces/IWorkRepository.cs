@@ -12,6 +12,7 @@ namespace SyncSharpServer.Interfaces
         Task<Guid> CreateWork(CreateWorkRequestModel request, CancellationToken cancellationToken);
         Task<bool> UpdateWork(UpdateWorkRequestModel request, CancellationToken cancellationToken);
         Task<bool> DeleteWork(Guid WorkID, CancellationToken cancellationToken);
+        Task<List<WorkVersion>> GetWorkVersions(Guid workID, int limit, CancellationToken cancellationToken);
         Task<bool> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
         Task<bool> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
         Task<bool> HasAccess(Guid WorkID, Guid UserID, CancellationToken cancellationToken);
@@ -21,6 +22,7 @@ namespace SyncSharpServer.Interfaces
         Task<ActiveSession?> GetSessionByConnectionID(string connectionID, CancellationToken cancellationToken);
         Task<List<ActiveSession>> GetActiveSessions(Guid WorkID, CancellationToken cancellationToken);
         Task<bool> UpdateSessionActivityAsync(string connectionID, CancellationToken cancellationToken);
+        Task<bool> CreateVersionAsync(Guid workID, string code, Guid modifiedBy, string description, CancellationToken cancellationToken);
         Task<WorkDetailDTO> GetWorkDetail(Guid WorkID, CancellationToken cancellationToken);
     }
 }

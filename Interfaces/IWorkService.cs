@@ -13,6 +13,7 @@ namespace SyncSharpServer.Interfaces
         Task<GeneralResponse<Guid>> CreateWork(CreateWorkRequestModel request, CancellationToken cancellationToken);
         Task<GeneralResponse<bool>> UpdateWork(UpdateWorkRequestModel request, CancellationToken cancellationToken);
         Task<GeneralResponse<bool>> DeleteWork(Guid WorkID, CancellationToken cancellationToken);
+        Task<GeneralResponse<List<WorkVersion>>> GetWorkVersions(Guid workID, int limit, CancellationToken cancellationToken);
         Task<GeneralResponse<bool>> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
         Task<GeneralResponse<bool>> DeleteWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken);
         Task<bool> HasAccess(Guid WorkID, Guid UserID, CancellationToken cancellationToken);

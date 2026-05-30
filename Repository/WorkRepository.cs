@@ -147,6 +147,27 @@ namespace SyncSharpServer.Repository
             }
         }
 
+        public async Task<List<WorkVersion>> GetWorkVersions(Guid workID, int limit, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+                var query = @"SELECT TOP (@Limit) * FROM WorkVersions WHERE WorkID = @WorkID ORDER BY ModifiedAt DESC";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@WorkID", workID);
+                parameters.Add("@Limit", limit);
+
+                var result = await connection.QueryAsync<WorkVersion>(query, parameters, commandType: System.Data.CommandType.Text);
+                return result.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error thrown in WorkRepository.GetWorkVersions. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { workID, limit }));
+                throw;
+            }
+        }
+
         public async Task<bool> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
         {
             try
@@ -351,6 +372,30 @@ namespace SyncSharpServer.Repository
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error thrown in WorkRepository.UpdateSessionActivityAsync. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { connectionID }));
+                throw;
+            }
+        }
+
+        public async Task<bool> CreateVersionAsync(Guid workID, string code, Guid modifiedBy, string description, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var connection = await _dbConnectionFactory.GetOpenConnection(cancellationToken);
+                var query = @"INSERT INTO WorkVersions(WorkID, Code, ModifiedBy, ChangeDescription) VALUES(@WorkID, @Code, @ModifiedBy, @ChangeDescription)";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@WorkID", workID);
+                parameters.Add("@Code", code);
+                parameters.Add("@ModifiedBy", modifiedBy);
+                parameters.Add("@ChangeDescription", description);
+
+                var result = await connection.ExecuteAsync(query, parameters, commandType: System.Data.CommandType.Text);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                var inputParams = new { workID, code, modifiedBy, description };
+                _logger.LogError(ex, "Error thrown in WorkRepository.CreateVersionAsync. Input parameters: {InputParams}", JsonConvert.SerializeObject(inputParams));
                 throw;
             }
         }

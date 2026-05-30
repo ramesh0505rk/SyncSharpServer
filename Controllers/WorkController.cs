@@ -45,6 +45,12 @@ namespace SyncSharpServer.Controllers
             return Ok(await _workService.DeleteWork(WorkID, cancellationToken));
         }
 
+        [HttpGet("{workID}/versions")]
+        public async Task<IActionResult> GetWorkVersions(Guid workID, [FromQuery] int limit, CancellationToken cancellationToken)
+        {
+            return Ok(await _workService.GetWorkVersions(workID, limit, cancellationToken));
+        }
+
         [HttpPost("AddWorkMember")]
         public async Task<IActionResult> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
         {

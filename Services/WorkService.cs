@@ -115,6 +115,26 @@ namespace SyncSharpServer.Services
             }
         }
 
+        public async Task<GeneralResponse<List<WorkVersion>>> GetWorkVersions(Guid workID, int limit, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var workVersions = await _workRepository.GetWorkVersions(workID, limit, cancellationToken);
+                if (workVersions == null || workVersions.Count == 0)
+                {
+                    _logger.LogError("Work versions not found for the specified WorkID. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { workID, limit }));
+                    throw new BadRequestException(["Work versions not found for the specified WorkID"]);
+                }
+                return CreateSuccessResponse<List<WorkVersion>>(workVersions);
+            }
+            catch (Exception ex)
+            {
+                var inputParams = new { workID, limit };
+                _logger.LogError(ex, "Error thrown in WorkService.GetWorkVersions. Input parameters: {InputParams}", JsonConvert.SerializeObject(inputParams));
+                throw;
+            }
+        }
+
         public async Task<GeneralResponse<bool>> AddWorkMember(AddDeleteWorkMemberRequestModel request, CancellationToken cancellationToken)
         {
             try
@@ -240,7 +260,7 @@ namespace SyncSharpServer.Services
             {
                 return await _workRepository.UpdateSessionActivityAsync(connectionID, cancellationToken);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error thrown in WorkService.UpdateSessionActivityAsync. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { connectionID }));
                 throw;
@@ -252,7 +272,7 @@ namespace SyncSharpServer.Services
             try
             {
                 var result = await _workRepository.GetWorkDetail(WorkID, cancellationToken);
-                if(result == null)
+                if (result == null)
                 {
                     _logger.LogError("Work detail not found for the specified WorkID. Input parameters: {InputParams}", JsonConvert.SerializeObject(new { WorkID }));
                     throw new BadRequestException(["Work detail not found for the specified WorkID"]);

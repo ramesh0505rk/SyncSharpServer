@@ -48,13 +48,13 @@ namespace SyncSharpServer.Repository
                 var query = @"
                             SELECT DISTINCT w.*,
                                 (
-                                    SELECT COUNT(as1.UserID) 
+                                    SELECT COUNT(as1.UserID)
                                     FROM ActiveSessions as1 WHERE WorkID = w.WorkID
-                                )
-                                FROM Work w
-                                LEFT JOIN WorkMembers wm ON w.WorkID = wm.WorkID
-                                WHERE w.CreatedBy = @UserID or wm.UserID = @UserID
-                                ORDER BY w.LastModified DESC
+                                ) AS ActiveUsersCount
+                            FROM Work w
+                            LEFT JOIN WorkMembers wm ON w.WorkID = wm.WorkID
+                            WHERE w.CreatedBy = @UserID or wm.UserID = @UserID
+                            ORDER BY w.LastModified DESC
                             ";
                 var parameters = new DynamicParameters();
                 parameters.Add("@UserID", UserID);

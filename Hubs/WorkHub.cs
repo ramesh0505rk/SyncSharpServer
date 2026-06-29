@@ -193,7 +193,7 @@ namespace SyncSharpServer.Hubs
             try
             {
                 // Find session in the active sessions by Connection ID
-                var session = await _workService.GetSessionByConnectionID(Context.ConnectionId, Context.ConnectionAborted);
+                var session = await _workService.GetSessionByConnectionID(Context.ConnectionId, CancellationToken.None);
 
                 if (session != null)
                 {
@@ -202,14 +202,15 @@ namespace SyncSharpServer.Hubs
                     // Notify others in the group
                     await Clients.OthersInGroup(groupName).SendAsync("UserDisconnected", new
                     {
-                        userID = session.ConnectionID,
+                        userID = session.UserID,
+                        connectionID = session.ConnectionID,
                         username = session.UserName,
                         workID = session.WorkID,
                         timestamp = DateTime.UtcNow
                     });
 
                     // Remove the session from DB
-                    await _workService.RemoveActiveSessionAsync(Context.ConnectionId, Context.ConnectionAborted);
+                    await _workService.RemoveActiveSessionAsync(Context.ConnectionId, CancellationToken.None);
 
                     _logger.LogInformation($"User {session.UserName} disconnected from work {session.WorkID}");
                 }
